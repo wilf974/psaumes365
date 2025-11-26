@@ -1,0 +1,217 @@
+// Schéma Prisma pour Meditatio - Web-App Méditation Biblique
+// Documentation: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Enum pour les rôles utilisateur
+enum UserRole {
+  USER        // Utilisateur standard
+  CONTRIBUTOR // Contributeur (peut créer des plans)
+  ADMIN       // Administrateur (accès complet)
+}
+
+/// Utilisateur de l'application
+model User {
+  id                    String          @id @default(cuid())
+  email                 String          @unique
+  name                  String?
+  password              String?
+  image                 String?
+  role                  UserRole        @default(USER)
+  hasCompletedOnboarding Boolean        @default(false)
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  journalEntries        JournalEntry[]
+  planProgress          PlanProgress[]
+  createdPlans          Plan[]          @relation("PlanCreator")
+  createdMeditations    GuidedMeditation[] @relation("MeditationCreator")
+  favoriteVerses        FavoriteVerse[]
+  meditationSessions    MeditationSession[]
+}
+
+/// Entrée du journal spirituel
+model JournalEntry {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  verseRef  String?  // Référence du verset lié (ex: "Jean 3:16")
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+/// Plan de méditation thématique
+model Plan {
+  id           String         @id @default(cuid())
+  title        String
+  description  String         @db.Text
+  theme        String         // Paix, Combat spirituel, Identité en Christ, etc.
+  durationDays Int
+  imageUrl     String?
+  imageGradient String?        // Dégradé CSS (ex: "from-olive-400 to-ciel-400")
+  icon         String?        // Emoji ou icône
+  isActive     Boolean        @default(true)
+  createdById  String?        // ID du créateur (null pour plans système)
+  createdBy    User?          @relation("PlanCreator", fields: [createdById], references: [id])
+  days         PlanDay[]
+  progress     PlanProgress[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([theme])
+  @@index([createdById])
+  @@index([isActive, theme]) // Index composite pour filtrer les plans actifs par thème
+}
+
+/// Jour d'un plan de méditation
+model PlanDay {
+  id         String @id @default(cuid())
+  dayNumber  Int
+  verseRef   String // Référence biblique (ex: "Psaume 23:1-6")
+  verseText  String? @db.Text // Texte du verset (optionnel, peut être récupéré depuis l'API Bible)
+  title      String
+  meditation String @db.Text // Texte de méditation guidée
+  prayer     String @db.Text // Prière suggérée
+  audioUrl   String? // URL du fichier audio (optionnel)
+  planId     String
+  plan       Plan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, dayNumber])
+  @@index([planId])
+}
+
+/// Progression d'un utilisateur dans un plan
+model PlanProgress {
+  id            String   @id @default(cuid())
+  userId        String
+  planId        String
+  currentDay    Int      @default(1)
+  completedDays Int[]    @default([])
+  startedAt     DateTime @default(now())
+  completedAt   DateTime?
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan          Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, planId])
+  @@index([userId])
+  @@index([planId])
+  @@index([userId, planId, currentDay]) // Index composite pour les requêtes de progression
+}
+
+/// Plans système supprimés (pour masquer les plans système supprimés)
+model DeletedSystemPlan {
+  id        String   @id @default(cuid())
+  planId    String   @unique // ID du plan système supprimé
+  deletedAt DateTime @default(now())
+  deletedBy String?  // ID de l'utilisateur qui a supprimé
+
+  @@index([planId])
+}
+
+/// Verset du jour (cache local)
+model DailyVerse {
+  id          String   @id @default(cuid())
+  date        DateTime @unique @db.Date
+  verseRef    String
+  verseText   String   @db.Text
+  translation String   @default("LSG")
+  commentary  String?  @db.Text
+  createdAt   DateTime @default(now())
+}
+
+/// Cache des audios générés par ElevenLabs
+model GeneratedAudio {
+  id          String   @id @default(cuid())
+  textHash    String   @unique // Hash MD5 du texte pour identification unique
+  text        String   @db.Text // Texte original
+  audioPath   String   // Chemin du fichier audio
+  voiceId     String   @default("XB0fDUnXU5powFXDhCwa") // ID de la voix utilisée
+  duration    Int?     // Durée en secondes (optionnel)
+  fileSize    Int?     // Taille en bytes (optionnel)
+  createdAt   DateTime @default(now())
+
+  @@index([textHash])
+}
+
+/// Session de méditation complétée
+model MeditationSession {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId       String?  // Optionnel si méditation libre
+  dayNumber    Int?     // Jour du plan (si applicable)
+  duration     Int      // Durée en secondes
+  verseRef     String?  // Verset médité
+  completedAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([completedAt])
+  @@index([userId, completedAt]) // Index composite pour les requêtes fréquentes
+  @@index([planId])
+}
+
+/// Verset favori
+model FavoriteVerse {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  verseRef  String   // Référence (ex: "Jean 3:16")
+  verseText String   @db.Text
+  note      String?  @db.Text // Note personnelle optionnelle
+  createdAt DateTime @default(now())
+
+  @@unique([userId, verseRef])
+  @@index([userId])
+}
+
+/// Verset commenté (banque de versets avec commentaires)
+model CommentedVerse {
+  id          String   @id @default(cuid())
+  verseRef    String   // Référence biblique (ex: "Jean 3:16")
+  verseText   String   @db.Text // Texte du verset
+  commentary  String   @db.Text // Commentaire/explication du verset
+  theme       String?  // Thème associé (ex: "Salut", "Amour", "Foi")
+  author      String?  // Auteur du commentaire (optionnel)
+  translation String   @default("LSG") // Traduction utilisée
+  isActive    Boolean  @default(true) // Pour activer/désactiver un commentaire
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([verseRef])
+  @@index([verseRef])
+  @@index([theme])
+  @@index([isActive])
+}
+
+/// Méditation guidée (créée par admin/contributor)
+model GuidedMeditation {
+  id            String   @id @default(cuid())
+  title         String   // Titre de la méditation
+  description   String?  @db.Text // Description/introduction
+  verseRef      String   // Référence biblique (ex: "Psaume 119:105")
+  verseText     String   @db.Text // Texte du verset
+  theme         String?  // Thème de la méditation
+  reflection    String   @db.Text // Réflexion/commentaire guidé
+  estimatedDuration Int   @default(5) // Durée estimée en minutes
+  audioUrl      String?  // URL du fichier audio (optionnel)
+  isActive      Boolean  @default(true)
+  createdById   String?  // ID du créateur
+  createdBy     User?    @relation("MeditationCreator", fields: [createdById], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([theme])
+  @@index([createdById])
+  @@index([verseRef])
+}
+

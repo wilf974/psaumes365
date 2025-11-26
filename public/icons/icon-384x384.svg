@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="384" height="384" viewBox="0 0 384 384" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fond avec dégradé -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6A8847;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4388B5;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Rectangle de fond arrondi -->
+  <rect width="384" height="384" rx="57.599999999999994" fill="url(#bgGradient)"/>
+  
+  <!-- Symbole livre/parchemin -->
+  <g transform="translate(192, 192)">
+    <!-- Livre ouvert -->
+    <path d="M -96 -57.599999999999994 L -57.599999999999994 -76.80000000000001 L -57.599999999999994 76.80000000000001 L -96 57.599999999999994 Z" 
+          fill="rgba(255,255,255,0.9)" stroke="rgba(255,255,255,0.5)" stroke-width="3.84"/>
+    <path d="M 57.599999999999994 -76.80000000000001 L 96 -57.599999999999994 L 96 57.599999999999994 L 57.599999999999994 76.80000000000001 Z" 
+          fill="rgba(255,255,255,0.9)" stroke="rgba(255,255,255,0.5)" stroke-width="3.84"/>
+    
+    <!-- Lignes de texte -->
+    <line x1="-76.80000000000001" y1="-19.200000000000003" x2="76.80000000000001" y2="-19.200000000000003" 
+          stroke="rgba(106,136,71,0.6)" stroke-width="3.072" stroke-linecap="round"/>
+    <line x1="-76.80000000000001" y1="0" x2="76.80000000000001" y2="0" 
+          stroke="rgba(106,136,71,0.6)" stroke-width="3.072" stroke-linecap="round"/>
+    <line x1="-76.80000000000001" y1="19.200000000000003" x2="76.80000000000001" y2="19.200000000000003" 
+          stroke="rgba(106,136,71,0.6)" stroke-width="3.072" stroke-linecap="round"/>
+  </g>
+</svg>

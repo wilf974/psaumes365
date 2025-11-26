@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  psaumes365-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: psaumes365-app
+    ports:
+      - "10000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://psaumes365:psaumes365_secret@psaumes365-db:5432/psaumes365_db?schema=public
+      - NEXTAUTH_URL=http://localhost:10000
+      - NEXTAUTH_SECRET=your-super-secret-key-change-in-production
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
+      - BIBLE_API_KEY=${BIBLE_API_KEY}
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      psaumes365-db:
+        condition: service_healthy
+    networks:
+      - psaumes365-network
+    restart: unless-stopped
+
+  psaumes365-db:
+    image: postgres:16-alpine
+    container_name: psaumes365-db
+    ports:
+      - "10001:5432"
+    environment:
+      - POSTGRES_USER=psaumes365
+      - POSTGRES_PASSWORD=psaumes365_secret
+      - POSTGRES_DB=psaumes365_db
+    volumes:
+      - psaumes365-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U psaumes365 -d psaumes365_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - psaumes365-network
+    restart: unless-stopped
+
+networks:
+  psaumes365-network:
+    driver: bridge
+
+volumes:
+  psaumes365-postgres-data:

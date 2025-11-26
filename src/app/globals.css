@@ -1,0 +1,215 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import des polices Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
+
+@layer base {
+  :root {
+    /* Palette claire - tons doux et apaisants */
+    --background: 40 33% 98%;
+    --foreground: 30 10% 20%;
+    
+    --card: 40 30% 97%;
+    --card-foreground: 30 10% 20%;
+    
+    --popover: 40 30% 97%;
+    --popover-foreground: 30 10% 20%;
+    
+    --primary: 82 30% 45%;
+    --primary-foreground: 40 33% 98%;
+    
+    --secondary: 40 30% 90%;
+    --secondary-foreground: 30 10% 25%;
+    
+    --muted: 40 20% 92%;
+    --muted-foreground: 30 10% 45%;
+    
+    --accent: 200 40% 70%;
+    --accent-foreground: 200 50% 20%;
+    
+    --destructive: 0 65% 50%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 40 20% 85%;
+    --input: 40 20% 85%;
+    --ring: 82 30% 45%;
+    
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    /* Palette sombre - tons profonds et reposants */
+    --background: 30 15% 12%;
+    --foreground: 40 20% 92%;
+    
+    --card: 30 15% 15%;
+    --card-foreground: 40 20% 92%;
+    
+    --popover: 30 15% 15%;
+    --popover-foreground: 40 20% 92%;
+    
+    --primary: 82 35% 50%;
+    --primary-foreground: 30 15% 12%;
+    
+    --secondary: 30 15% 20%;
+    --secondary-foreground: 40 20% 85%;
+    
+    --muted: 30 15% 18%;
+    --muted-foreground: 40 15% 60%;
+    
+    --accent: 200 35% 45%;
+    --accent-foreground: 200 20% 95%;
+    
+    --destructive: 0 55% 45%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 30 15% 22%;
+    --input: 30 15% 22%;
+    --ring: 82 35% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  
+  /* Empêcher le débordement horizontal */
+  html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* S'assurer que les images ne débordent pas */
+  img, svg, Image {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Empêcher les débordements sur mobile */
+  * {
+    box-sizing: border-box;
+  }
+  
+  /* Container principal */
+  .container {
+    max-width: 100%;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  
+  @media (min-width: 640px) {
+    .container {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .container {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+  
+  /* Permettre le menu mobile de s'afficher au-dessus de tout */
+  body.menu-open {
+    overflow: hidden;
+  }
+
+  /* Typographie spirituelle */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif tracking-tight;
+  }
+
+  /* Versets bibliques */
+  .verse-text {
+    @apply font-serif text-lg leading-relaxed italic;
+  }
+
+  .verse-reference {
+    @apply font-sans text-sm text-muted-foreground not-italic;
+  }
+
+  /* Scrollbar personnalisée */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted/30 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/30;
+  }
+
+  /* Sélection de texte */
+  ::selection {
+    @apply bg-primary/20 text-foreground;
+  }
+}
+
+@layer components {
+  /* Carte de méditation */
+  .meditation-card {
+    @apply bg-card rounded-2xl p-6 shadow-sm border border-border/50 
+           transition-all duration-300 hover:shadow-md hover:border-border;
+  }
+
+  /* Bouton spirituel */
+  .btn-spiritual {
+    @apply bg-primary text-primary-foreground px-6 py-3 rounded-xl
+           font-medium transition-all duration-300
+           hover:bg-primary/90 hover:shadow-lg
+           active:scale-[0.98] disabled:opacity-50;
+  }
+
+  /* Container de verset */
+  .verse-container {
+    @apply bg-gradient-to-br from-beige-100 to-sable-100 
+           dark:from-beige-900/20 dark:to-sable-900/20
+           rounded-2xl p-8 border border-beige-200 dark:border-beige-800/30;
+  }
+
+  /* Animation d'apparition */
+  .animate-appear {
+    animation: appear 0.6s ease-out forwards;
+  }
+
+  @keyframes appear {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Délais d'animation échelonnés */
+  .delay-100 { animation-delay: 100ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-400 { animation-delay: 400ms; }
+  .delay-500 { animation-delay: 500ms; }
+}
+
+@layer utilities {
+  /* Fond texturé subtil */
+  .bg-texture {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C927D' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+}
+
+
